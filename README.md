@@ -47,7 +47,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000, register (you become the admin), and sign in. Or run everything with `docker compose up --build`.
+Open http://localhost:3000 (the landing page), click Get started, register (you become the admin), and sign in. Or run everything with `docker compose up --build`.
 
 Tests: `cd backend && python manage.py test evaluations`
 
