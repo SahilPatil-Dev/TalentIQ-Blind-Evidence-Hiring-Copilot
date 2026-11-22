@@ -3,6 +3,7 @@
  * turns on toast messages, and adds the sidebar frame (Shell).
  */
 import type { Metadata, Viewport } from "next";
+import { AuthProvider } from "@/components/AuthProvider";
 import { Shell } from "@/components/Shell";
 import { ToastProvider } from "@/components/Toast";
 import "./globals.css";
@@ -28,7 +29,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body>
         <ToastProvider>
-          <Shell>{children}</Shell>
+          <AuthProvider>
+            <Shell>{children}</Shell>
+          </AuthProvider>
         </ToastProvider>
       </body>
     </html>

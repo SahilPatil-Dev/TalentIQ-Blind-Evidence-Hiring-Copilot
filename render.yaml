@@ -33,5 +33,7 @@ services:
         value: codestral-2508
       - key: CORS_ALLOWED_ORIGINS
         sync: false                  # paste your Vercel URL, e.g. https://talentiq.vercel.app
+      - key: KEY_ENCRYPTION_KEY
+        sync: false                  # a Fernet key you generate (see README); never commit it
       - key: NUM_PROXIES
         value: "1"                   # Render has 1 proxy in front (used by the upload limiter)

@@ -74,6 +74,8 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
             "workflow_trace",
             "created_at",
             "decided_at",
+            "decision_reason",
+            "legal_hold",
         ]
         read_only_fields = fields
 

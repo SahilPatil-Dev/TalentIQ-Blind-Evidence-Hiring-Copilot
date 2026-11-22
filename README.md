@@ -2,7 +2,7 @@
 
 Hide who a candidate is, quote the proof in their résumé, score it with plain maths — and let the human decide.
 
-- **Blind review:** name, email, phone, university and pronouns are removed before anything is evaluated. The identity is stored encrypted and only shown after you **shortlist**.
+- **Blind review:** name, email, phone, university and pronouns are removed before anything is evaluated. The identity is stored encrypted. After you **shortlist** (with a written reason) an admin or recruiter can **reveal** it, which is recorded in the audit log.
 - **Evidence, not vibes:** Mistral **Codestral** (`codestral-2508`) quotes the résumé sentence that proves each skill. Python then checks every quote exists *word for word*. Invented claims earn zero.
 - **Deterministic score:** Python adds up the points (verified = full weight, partial = half, missing = 0). The same résumé always gets the same score.
 - **Works without AI too:** no API key? A simple keyword matcher is used instead.
@@ -83,8 +83,37 @@ Back on Render → your service → **Environment** → set **`CORS_ALLOWED_ORIG
 
 ## API
 
-`GET /api/health/` · `GET|POST /api/jobs/` · `GET /api/jobs/<id>/` · `POST /api/jobs/<id>/applications/` (multipart `resume`) · `GET /api/applications/<id>/` · `POST /api/applications/<id>/decision/` with `{"decision":"shortlist"|"reject"}`
+Everything except `health`, `auth/register` and `auth/login` needs `Authorization: Bearer <token>`.
 
-## Not production-ready (on purpose)
+`GET /api/health/` · `GET|POST /api/jobs/` · `GET /api/jobs/<id>/` · `POST /api/jobs/<id>/applications/` (multipart `resume`) · `GET|DELETE /api/applications/<id>/` · `POST /api/applications/<id>/decision/` with `{"decision":"shortlist"|"reject","reason":"..."}` · `POST /api/applications/<id>/reveal/` with `{"reason":"..."}` · `POST /api/applications/<id>/hold/`
 
-This is a portfolio project. Before real hiring use: add login and roles, retention/deletion rules, audited identity reveal, managed encryption keys, fairness testing and a compliance review. Demo résumés are fictional — don't upload real candidate data to a public demo.
+Accounts: `POST /api/auth/register/` · `/login/` · `/logout/` · `GET /api/auth/me/` · `POST /api/auth/password/` · `GET /api/users/` · `PATCH /api/users/<id>/`
+
+Governance: `GET /api/audit/` (`?format=csv`) · `GET /api/audit/verify/` · `GET|PUT /api/retention/` · `POST /api/retention/run/` · `GET /api/keys/` · `POST /api/keys/rotate/` · `POST /api/keys/reencrypt/` · `GET|POST /api/fairness/runs/` · `POST /api/fairness/adverse-impact/` · `GET /api/compliance/`
+
+## Accounts and roles
+
+The **first account** that registers becomes the administrator. Everyone after that waits on the **Users** page for approval. Five wrong passwords lock an account for 15 minutes; sessions last 12 hours.
+
+| Role | Can do |
+|---|---|
+| Administrator | Everything: users, keys, retention, deletion, legal hold |
+| Recruiter | Create roles, upload résumés, decide, reveal identity |
+| Reviewer | Read-only blind review |
+| Auditor | Audit log, fairness tests, compliance, retention (read). No candidate data |
+
+## Governance features
+
+- **Audited identity reveal:** shortlisting does not show who someone is. A recruiter or admin must give a reason to reveal; who, when and why is logged and shown on the candidate page. Identity values are never written to the log.
+- **Audit log:** append-only and hash-chained. **Verify integrity** on the Audit page detects edited entries. Note: someone with direct database access could rewrite the whole chain, so export the CSV regularly to an outside store.
+- **Retention and deletion:** limits per outcome (default: rejected 30 days, undecided 90, shortlisted 365). Runs on every server start, plus on demand. Admins can delete a candidate or place a **legal hold**.
+- **Managed keys:** identities are encrypted with versioned data keys, which are wrapped by a master key from `KEY_ENCRYPTION_KEY` (envelope encryption). Rotate keys and re-encrypt from the **Keys** page, or run `python manage.py rotate_keys`. To rotate the master key, set `KEY_ENCRYPTION_KEY="new,old"`, run `rotate_keys`, then remove the old one.
+- **Fairness testing:** the counterfactual test checks that names, universities and pronouns cannot change a score after redaction. It also lists cases redaction misses (a name in a sign-off, club names). A four-fifths-rule calculator takes real selection counts. This tests our own pipeline; it is not an independent bias audit.
+- **Compliance review:** a live checklist of controls the system can verify, plus items only people can confirm (impact assessment, candidate notice, processor agreements). It is an engineering checklist, not legal advice.
+
+Generate a master key with:
+`python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`
+
+## Still your job before real hiring
+
+Software cannot do these for you: a data protection impact assessment, telling candidates an automated tool is used and how to request human review, data processing agreements with Mistral, Render and Vercel, an independent bias audit where the law requires one, and a process for access and erasure requests. Redaction is pattern-based and will miss some details, so review the fairness probes. Demo résumés are fictional; don't upload real candidate data to a public demo.

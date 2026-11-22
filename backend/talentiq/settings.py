@@ -104,14 +104,38 @@ LANGUAGE_CODE = "en-us"
 # --------------------------------------------------------------------------
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
-    # This demo has no login system, so nobody is "authenticated".
-    "DEFAULT_AUTHENTICATION_CLASSES": [],
-    "UNAUTHENTICATED_USER": None,
-    # Protect your Mistral credits: limit resume uploads per visitor (per IP).
+    # Everything needs a signed-in user unless a view says otherwise (see auth.py).
+    "DEFAULT_AUTHENTICATION_CLASSES": ["evaluations.auth.TokenAuthentication"],
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    # Protect your Mistral credits and the login form from guessing.
     # On Render there is one proxy in front of us, so NUM_PROXIES=1 there.
     "NUM_PROXIES": int(os.getenv("NUM_PROXIES", "0")),
-    "DEFAULT_THROTTLE_RATES": {"upload": os.getenv("UPLOAD_RATE_LIMIT", "30/hour")},
+    "DEFAULT_THROTTLE_RATES": {
+        "upload": os.getenv("UPLOAD_RATE_LIMIT", "30/hour"),  # per signed-in user
+        "auth": os.getenv("AUTH_RATE_LIMIT", "20/hour"),      # login + register, per IP
+    },
 }
+
+# --------------------------------------------------------------------------
+# Accounts and sessions
+# --------------------------------------------------------------------------
+AUTH_TOKEN_TTL_HOURS = int(os.getenv("AUTH_TOKEN_TTL_HOURS", "12"))
+MAX_FAILED_LOGINS = int(os.getenv("MAX_FAILED_LOGINS", "5"))
+LOCKOUT_MINUTES = int(os.getenv("LOCKOUT_MINUTES", "15"))
+AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+     "OPTIONS": {"min_length": 10}},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+]
+
+# --------------------------------------------------------------------------
+# Browser security headers (only matter over HTTPS, so off while developing)
+# --------------------------------------------------------------------------
+if not DEBUG:
+    SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "31536000"))
+    SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # --------------------------------------------------------------------------
 # CORS: which websites are allowed to call this API from a browser
@@ -146,3 +170,10 @@ PII_ENCRYPTION_KEY = (
     if _configured_encryption_key
     else base64.urlsafe_b64encode(hashlib.sha256(SECRET_KEY.encode()).digest())
 )
+
+# Master key ("KEK") that wraps the data keys stored in the database.
+# KEY_ENCRYPTION_KEY takes one Fernet key, or "new,old" while rotating the master key.
+# Without it we fall back to PII_ENCRYPTION_KEY (and ultimately SECRET_KEY): fine for a
+# demo, but the compliance review flags it.
+KEK_IS_EXPLICIT = bool(os.getenv("KEY_ENCRYPTION_KEY"))
+KEY_ENCRYPTION_KEY = os.getenv("KEY_ENCRYPTION_KEY") or PII_ENCRYPTION_KEY.decode()

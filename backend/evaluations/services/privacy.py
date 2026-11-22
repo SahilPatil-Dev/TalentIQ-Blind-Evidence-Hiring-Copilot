@@ -5,15 +5,13 @@ Privacy helpers: hide a candidate's identity, and lock it away safely.
                    placeholders like [EMAIL_REDACTED] and returns the removed
                    values separately.
   encrypt_pii() /  turn those removed values into an unreadable string for the
-  decrypt_pii()    database (Fernet encryption) and back again.
+  decrypt_pii()    database and back again (keys are managed in services/keys.py).
 
 These are simple pattern-based rules - good for a demo, not a legal guarantee.
 """
-import json
 import re
 
-from cryptography.fernet import Fernet
-from django.conf import settings
+from . import keys
 
 # Patterns that spot common identity details in resume text.
 EMAIL_RE = re.compile(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", re.I)
@@ -30,20 +28,14 @@ PRONOUN_RE = re.compile(
 )
 
 
-def _cipher():
-    return Fernet(settings.PII_ENCRYPTION_KEY)
-
-
 def encrypt_pii(data):
-    """dict -> encrypted text that is safe to store."""
-    return _cipher().encrypt(json.dumps(data).encode()).decode()
+    """dict -> encrypted text that is safe to store (uses the managed key ring)."""
+    return keys.encrypt_data(data)
 
 
 def decrypt_pii(value):
     """Encrypted text -> the original dict ({} if there is nothing stored)."""
-    if not value:
-        return {}
-    return json.loads(_cipher().decrypt(value.encode()))
+    return keys.decrypt_data(value)
 
 
 def redact_resume(text):
