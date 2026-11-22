@@ -27,6 +27,11 @@ const PATHS = {
   trash: (<><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></>),
   refresh: (<><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></>),
   briefcase: (<><rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></>),
+  key: (<><circle cx="7.5" cy="15.5" r="4.5" /><line x1="10.7" y1="12.3" x2="21" y2="2" /><line x1="18" y1="5" x2="21" y2="8" /><line x1="15" y1="8" x2="17" y2="10" /></>),
+  list: (<><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></>),
+  scale: (<><line x1="12" y1="3" x2="12" y2="21" /><line x1="5" y1="21" x2="19" y2="21" /><path d="M5 7l-3 8a4 4 0 0 0 6 0z" /><path d="M19 7l-3 8a4 4 0 0 0 6 0z" /><line x1="5" y1="7" x2="19" y2="7" /></>),
+  clipboard: (<><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><rect x="8" y="2" width="8" height="4" rx="1" /><polyline points="9 14 11 16 15 12" /></>),
+  logout: (<><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></>),
 } satisfies Record<string, ReactNode>;
 
 export type IconName = keyof typeof PATHS;

@@ -4,13 +4,15 @@
  *
  * Left: the evidence matrix (the quote that earned each point) and the
  * evaluation trace. Right: the identity card and the interview questions.
- * Flow: load the candidate (api.getApplication). Clicking "Shortlist" calls
- * api.decide(); we reload, and now the backend includes the real identity, so
- * the redaction bars slide away.
+ * Flow: load the candidate (api.getApplication). Deciding calls api.decide() with a
+ * written reason. After a shortlist, "Reveal identity" calls api.reveal() with a
+ * reason; the backend logs it and returns the identity, and the redaction bars slide
+ * away. The identity is only kept in this page's memory, never saved in the browser.
  */
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "@/components/AuthProvider";
 import { Icon } from "@/components/Icon";
 import { IdentityCard } from "@/components/IdentityCard";
 import { ErrorNotice, LoadingBlock } from "@/components/PageState";
@@ -20,10 +22,13 @@ import { useToast } from "@/components/Toast";
 import { Topbar } from "@/components/Topbar";
 import { api, type CandidateDetail } from "@/lib/api";
 import { earnedPoints } from "@/lib/format";
+import { can } from "@/lib/roles";
 
 export default function ApplicationPage() {
   const params = useParams<{ id: string }>();
   const toast = useToast();
+  const { user } = useAuth();
+  const [identity, setIdentity] = useState<Record<string, string> | undefined>(undefined);
   const [application, setApplication] = useState<CandidateDetail | null>(null);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -42,16 +47,32 @@ export default function ApplicationPage() {
     void load();
   }, [load]);
 
-  // Record the human decision, then reload to get the updated candidate.
-  async function decide(decision: "shortlist" | "reject") {
+  // Record the human decision (with its reason), then reload the candidate.
+  async function decide(decision: "shortlist" | "reject", reason: string) {
     if (!application) return;
     setSaving(true);
     try {
-      await api.decide(application.id, decision);
+      await api.decide(application.id, decision, reason);
       await load();
-      toast("success", decision === "shortlist" ? "Shortlisted. Identity revealed." : "Candidate archived.");
+      toast("success", decision === "shortlist" ? "Shortlisted. You can now reveal the identity." : "Candidate archived.");
     } catch (reason) {
       toast("error", reason instanceof Error ? reason.message : "Could not record the decision.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  // Audited reveal: the reason is stored in the audit log.
+  async function reveal(reason: string) {
+    if (!application) return;
+    setSaving(true);
+    try {
+      const result = await api.reveal(application.id, reason);
+      setIdentity(result.identity);
+      await load();
+      toast("success", "Identity revealed and logged.");
+    } catch (error) {
+      toast("error", error instanceof Error ? error.message : "Could not reveal the identity.");
     } finally {
       setSaving(false);
     }
@@ -147,12 +168,20 @@ export default function ApplicationPage() {
 
             <div className="stack">
               <IdentityCard
-                identity={application.identity}
+                identity={identity}
                 status={application.status}
                 busy={saving}
-                onShortlist={() => void decide("shortlist")}
-                onReject={() => void decide("reject")}
+                canManage={can.manageHiring(user?.role)}
+                history={application.reveal_history}
+                onDecide={(decision, reason) => void decide(decision, reason)}
+                onReveal={(reason) => void reveal(reason)}
               />
+              {application.decision_reason && (
+                <section className="panel panel-pad">
+                  <div className="panel-head"><h2>Decision reason</h2></div>
+                  <p>{application.decision_reason}</p>
+                </section>
+              )}
 
               <section className="panel panel-pad">
                 <div className="panel-head"><h2>Interview questions</h2></div>

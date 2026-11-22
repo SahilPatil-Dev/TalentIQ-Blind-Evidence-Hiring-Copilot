@@ -1,11 +1,14 @@
 #!/bin/sh
 # Starts the API. Used by Docker AND by Render, so there is one way to run it.
-#   1. create / update the database tables
+#   1. create / update the database tables, then apply the retention policy
 #   2. add the sample role + candidates (skip with SEED_DEMO=0)
 #   3. run the web server (gunicorn) on the port the host gives us
 set -e
 
 python manage.py migrate --noinput
+
+# Apply the data-retention policy on every start (free hosts have no scheduler).
+python manage.py enforce_retention || true
 
 if [ "${SEED_DEMO:-1}" = "1" ]; then
   python manage.py seed_demo

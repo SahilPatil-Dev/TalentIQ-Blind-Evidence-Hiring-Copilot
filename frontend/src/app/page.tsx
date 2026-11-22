@@ -8,6 +8,7 @@
  */
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "@/components/AuthProvider";
 import { CountUp } from "@/components/CountUp";
 import { Icon } from "@/components/Icon";
 import { EmptyState, ErrorNotice, LoadingBlock } from "@/components/PageState";
@@ -16,16 +17,18 @@ import { RubricBar } from "@/components/RubricBar";
 import { Topbar } from "@/components/Topbar";
 import { api, type Role } from "@/lib/api";
 import { plural } from "@/lib/format";
+import { can } from "@/lib/roles";
 
 // The four steps a résumé goes through (shown in the "how it works" strip).
 const STEPS = [
   { title: "Hide identity", text: "Name, email, phone, university and pronouns are removed and locked away." },
   { title: "Find evidence", text: "Codestral quotes the résumé sentence that proves each skill on your rubric." },
   { title: "Verify quotes", text: "Python checks every quote exists word for word. Invented claims earn nothing." },
-  { title: "You decide", text: "Python adds up the score. You shortlist or archive, and only then is identity shown." },
+  { title: "You decide", text: "Python adds up the score. You shortlist or archive with a reason; revealing identity is logged." },
 ];
 
 export default function Dashboard() {
+  const { user } = useAuth();
   const [roles, setRoles] = useState<Role[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -65,9 +68,11 @@ export default function Dashboard() {
             decision stays with you.
           </p>
           <div className="hero-actions">
-            <Link href="/jobs/new" className="btn btn-primary">
-              <Icon name="plus" size={17} /> Create a role
-            </Link>
+            {can.manageHiring(user?.role) && (
+              <Link href="/jobs/new" className="btn btn-primary">
+                <Icon name="plus" size={17} /> Create a role
+              </Link>
+            )}
             {roles[0] && (
               <Link href={`/jobs/${roles[0].id}`} className="btn btn-ghost">
                 Open the sample pipeline

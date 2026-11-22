@@ -22,6 +22,7 @@ services:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-local-only-change-me}
       DJANGO_DEBUG: ${DJANGO_DEBUG:-1}
       PII_ENCRYPTION_KEY: ${PII_ENCRYPTION_KEY:-}
+      KEY_ENCRYPTION_KEY: ${KEY_ENCRYPTION_KEY:-}
       DATABASE_URL: postgres://talentiq:talentiq@db:5432/talentiq
       MISTRAL_API_KEY: ${MISTRAL_API_KEY:-}
       MISTRAL_MODEL: ${MISTRAL_MODEL:-codestral-2508}

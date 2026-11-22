@@ -9,10 +9,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { RequireRole } from "@/components/RequireRole";
 import { Icon } from "@/components/Icon";
 import { RubricBar } from "@/components/RubricBar";
 import { Topbar } from "@/components/Topbar";
 import { api } from "@/lib/api";
+import { can } from "@/lib/roles";
 
 // While typing, keywords are plain text ("Python, Django"). We split them into
 // a list only when saving.
@@ -75,7 +77,7 @@ export default function NewRolePage() {
   const hint = isValid ? "Ready" : total < 100 ? `Add ${100 - total} more` : `Remove ${total - 100}`;
 
   return (
-    <>
+    <RequireRole allowed={can.manageHiring}>
       <Topbar trail={[{ label: "Overview", href: "/" }, { label: "New role" }]} />
       <div className="page-head">
         <div>
@@ -157,6 +159,6 @@ export default function NewRolePage() {
           </ul>
         </aside>
       </form>
-    </>
+    </RequireRole>
   );
 }

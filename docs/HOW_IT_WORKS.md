@@ -25,7 +25,7 @@
    - `retry`    if not, ask once more.
    - `score`    drop anything still unsupported, add up the points **in Python**, write 3 interview questions.
 4. **Save** the candidate as *Needs review*. The response contains **no identity**.
-5. **You decide** in the UI. Only **Shortlist** makes the API decrypt and return the identity (`views.application_detail`). Archived candidates stay sealed.
+5. **You decide** in the UI. A decision needs a written reason. After a **Shortlist**, an admin or recruiter can call `views.reveal_identity` with a reason; the API logs it (`services/audit.py`) before decrypting and returning the identity. Archived candidates stay sealed.
 
 **Why the AI doesn't score:** models can invent facts. So the AI only *suggests quotes*; Python verifies them and does the arithmetic. Same résumé → same score.
 

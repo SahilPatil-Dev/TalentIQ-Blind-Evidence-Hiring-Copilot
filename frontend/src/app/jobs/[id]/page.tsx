@@ -10,6 +10,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "@/components/AuthProvider";
 import { Icon } from "@/components/Icon";
 import { EmptyState, ErrorNotice, LoadingBlock } from "@/components/PageState";
 import { RubricBar } from "@/components/RubricBar";
@@ -19,6 +20,7 @@ import { Topbar } from "@/components/Topbar";
 import { UploadZone, type UploadProgress } from "@/components/UploadZone";
 import { api, type Role, type Status } from "@/lib/api";
 import { formatDate, scoreTone } from "@/lib/format";
+import { can } from "@/lib/roles";
 
 const FILTERS: { label: string; value: Status | "ALL" }[] = [
   { label: "All", value: "ALL" },
@@ -28,6 +30,7 @@ const FILTERS: { label: string; value: Status | "ALL" }[] = [
 ];
 
 export default function RolePage() {
+  const { user } = useAuth();
   const params = useParams<{ id: string }>();
   const toast = useToast();
   const [role, setRole] = useState<Role | null>(null);
@@ -100,8 +103,12 @@ export default function RolePage() {
             </div>
           </section>
 
-          <div className="section-head"><div><h2>Add résumés</h2></div></div>
-          <UploadZone onFiles={uploadFiles} progress={progress} />
+          {can.manageHiring(user?.role) && (
+            <>
+              <div className="section-head"><div><h2>Add résumés</h2></div></div>
+              <UploadZone onFiles={uploadFiles} progress={progress} />
+            </>
+          )}
 
           <div className="section-head">
             <div>
