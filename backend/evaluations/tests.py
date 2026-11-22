@@ -529,7 +529,7 @@ class AuthTests(TestCase):
 
     def test_weak_password_is_rejected(self):
         self.assertEqual(self.register("a@example.test", "short").status_code, 400)
-        self.assertEqual(self.register("b@example.test", "password1234").status_code, 400)
+        self.assertEqual(self.register("b@example.test", "12345678901").status_code, 400)
 
     def test_account_locks_after_repeated_wrong_passwords(self):
         self.register("boss@example.test")
