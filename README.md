@@ -89,7 +89,7 @@ Everything except `health`, `auth/register` and `auth/login` needs `Authorizatio
 
 Accounts: `POST /api/auth/register/` · `/login/` · `/logout/` · `GET /api/auth/me/` · `POST /api/auth/password/` · `GET /api/users/` · `PATCH /api/users/<id>/`
 
-Governance: `GET /api/audit/` (`?format=csv`) · `GET /api/audit/verify/` · `GET|PUT /api/retention/` · `POST /api/retention/run/` · `GET /api/keys/` · `POST /api/keys/rotate/` · `POST /api/keys/reencrypt/` · `GET|POST /api/fairness/runs/` · `POST /api/fairness/adverse-impact/` · `GET /api/compliance/`
+Governance: `GET /api/audit/` (`?export=csv`) · `GET /api/audit/verify/` · `GET|PUT /api/retention/` · `POST /api/retention/run/` · `GET /api/keys/` · `POST /api/keys/rotate/` · `POST /api/keys/reencrypt/` · `GET|POST /api/fairness/runs/` · `POST /api/fairness/adverse-impact/` · `GET /api/compliance/`
 
 ## Accounts and roles
 

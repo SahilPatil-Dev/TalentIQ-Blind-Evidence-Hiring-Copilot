@@ -649,7 +649,7 @@ class AuditTests(TestCase):
 
     def test_audit_csv_export(self):
         self.shortlist_and_reveal()
-        response = self.auditor.get("/api/audit/?format=csv")
+        response = self.auditor.get("/api/audit/?export=csv")
         self.assertEqual(response.status_code, 200)
         self.assertIn("identity.reveal", response.content.decode())
 

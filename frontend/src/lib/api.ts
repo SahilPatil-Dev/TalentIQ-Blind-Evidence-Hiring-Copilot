@@ -311,7 +311,7 @@ export const api = {
 
   /** Download the audit log as CSV (needs the token, so it can't be a plain link). */
   async downloadAuditCsv() {
-    const response = await fetch(`${API_URL}/api/audit/?format=csv`, {
+    const response = await fetch(`${API_URL}/api/audit/?export=csv`, {
       headers: { Authorization: `Bearer ${tokenStore.get() ?? ""}` },
     });
     if (!response.ok) throw new Error("Could not export the audit log.");

@@ -30,16 +30,16 @@ def _audit_row(entry):
 @api_view(["GET"])
 @permission_classes([has_role(*CAN_SEE_GOVERNANCE)])
 def audit_log(request):
-    """Newest first. Filters: ?action=identity.reveal&limit=100&before=<id>. ?format=csv exports."""
+    """Newest first. Filters: ?action=identity.reveal&limit=100&before=<id>. ?export=csv exports."""
     entries = AuditLog.objects.order_by("-id")
     if request.query_params.get("action"):
         entries = entries.filter(action=request.query_params["action"])
     if request.query_params.get("before", "").isdigit():
         entries = entries.filter(id__lt=int(request.query_params["before"]))
-    limit = 5000 if request.query_params.get("format") == "csv" else 100
+    limit = 5000 if request.query_params.get("export") == "csv" else 100
     rows = [_audit_row(entry) for entry in entries[:limit]]
 
-    if request.query_params.get("format") == "csv":
+    if request.query_params.get("export") == "csv":
         log_event(request, "audit.export", "audit", "", {"rows": len(rows)})
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = 'attachment; filename="talentiq-audit-log.csv"'
