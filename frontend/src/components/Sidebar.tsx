@@ -89,7 +89,7 @@ export function Sidebar() {
         </div>
       </aside>
 
-      <nav className="tabbar" aria-label="Main" style={{ gridTemplateColumns: `repeat(${links.length + 1}, 1fr)` }}>
+      <nav className="tabbar" aria-label="Main">
         {links.map((link) => (
           <Link key={link.href} href={link.href} className={isActive(link.href) ? "active" : ""}>
             <Icon name={link.icon} size={20} /> <span className="tab-label">{link.label}</span>

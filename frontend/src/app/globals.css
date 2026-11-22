@@ -509,3 +509,61 @@ textarea.input { height: auto; padding: 12px 14px; line-height: 1.5; resize: ver
   .rail, .tabbar, .head-actions, .topbar { display: none !important; }
   .shell { display: block; }
 }
+
+/* ---------- 13. Mobile fixes (phones and small tablets) ---------- */
+html, body { max-width: 100%; overflow-x: hidden; }
+.content-inner, .panel, .page-head > div { min-width: 0; }
+.panel-head { flex-wrap: wrap; }
+.data-row strong, .data-row .muted, .check-row strong, .check-row .muted, .audit-row strong, .audit-row .muted, .reveal-history li {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 860px) {
+  /* Bottom bar: every item keeps a readable size and the bar scrolls sideways when
+     there are many (administrators see 9 links). */
+  .tabbar {
+    display: flex; gap: 4px; overflow-x: auto; overflow-y: hidden;
+    scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    left: 8px; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom));
+  }
+  .tabbar::-webkit-scrollbar { display: none; }
+  .tabbar a {
+    flex: 0 0 auto; min-width: 74px; padding: 0 10px; scroll-snap-align: start;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    height: 54px; font-size: 11px; line-height: 1.1; white-space: nowrap;
+  }
+  .content { padding: 0 16px calc(110px + env(safe-area-inset-bottom)); }
+  .toasts { bottom: calc(92px + env(safe-area-inset-bottom)); }
+
+  /* iOS zooms into inputs smaller than 16px. */
+  .input, select.input, textarea.input { font-size: 16px; }
+  .toolbar { max-width: none; }
+  .head-actions { width: 100%; }
+  .head-actions .btn { flex: 1 1 auto; justify-content: center; }
+  .row-actions { justify-content: flex-start; }
+  .data-row .input { width: 100%; }
+  .id-value { min-width: 0; }
+  .id-row { flex-wrap: wrap; }
+  .section-head { margin-top: 30px; }
+  .form-actions { flex-wrap: wrap; }
+  .form-actions .btn { flex: 1 1 auto; justify-content: center; }
+  .summary-row { gap: 22px; }
+}
+
+@media (max-width: 520px) {
+  .content { padding-left: 14px; padding-right: 14px; }
+  .panel-pad { padding: 18px 16px; }
+  .hero { padding: 26px 18px; gap: 22px; }
+  .hero h1 { font-size: 30px; }
+  .hero .lead { font-size: 15.5px; }
+  .hero-actions .btn { flex: 1 1 100%; justify-content: center; }
+  .page-head h1 { font-size: 24px; }
+  .stages { grid-template-columns: 1fr; }
+  .flow-step { padding: 18px 18px 20px; }
+  .ledger > div { padding: 16px 18px; }
+  .auth-page { padding: 14px; align-items: start; padding-top: 8vh; }
+  .auth-card { padding: 22px 18px; }
+  .crit { grid-template-columns: 1fr 76px 36px; }
+  .role-row, .cand-row { padding-left: 14px; padding-right: 14px; }
+  .audit-row .num { font-size: 12.5px; }
+}
