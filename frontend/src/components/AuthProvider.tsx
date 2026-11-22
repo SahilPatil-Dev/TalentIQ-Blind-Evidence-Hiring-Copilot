@@ -60,9 +60,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener(SIGNED_OUT_EVENT, onSignedOut);
   }, [router]);
 
-  // Pages other than login/register need a signed-in user.
+  // Pages other than login, register and the landing page ("/") need a signed-in user.
   useEffect(() => {
-    if (!loading && !user && !PUBLIC_PATHS.includes(pathname)) router.replace("/login");
+    if (!loading && !user && pathname !== "/" && !PUBLIC_PATHS.includes(pathname)) router.replace("/login");
   }, [loading, user, pathname, router]);
 
   const signIn = useCallback(async (email: string, password: string) => {
